@@ -1,0 +1,108 @@
+<script>
+	function MyFunction(aggregate){
+		keyword = aggregate.name;
+		console.log("keyword: "+keyword);
+		songs_array = document.getElementsByClassName('search-result row');
+		songs_array = Array.from(songs_array);
+		matching_songs = songs_array.filter(keyword_filter,keyword);
+		len_matching = matching_songs.length;
+		len_original = songs_array.length;
+		section = document.getElementById('song_section');
+		section.innerHTML = matching_songs.map(e => e.outerHTML).join()
+		console.log(section);
+		header = document.getElementById('results');
+		header.innerHTML = `<h2 class="lead" id="results"><strong class="text-danger">${len_matching}</strong> results out of ${len_original} matches the criteria</h2>`;
+
+		var tags_ul = document.getElementById("tags");
+		var tags_li = document.createElement("li");
+		tags_li.setAttribute("style","display:inline-block; padding:15px; margin:10px; border: 2px solid blue; border-radius: 5px;");
+		tags_li.appendChild(document.createTextNode(keyword));
+		tags_ul.appendChild(tags_li);
+	}
+
+	function keyword_filter(element){
+		keyword = this;
+		content = element.innerText;
+		return content.includes(keyword)
+	}
+
+</script>
+
+<div class="container" style="background-color: Khaki;">
+    <hgroup class="mb20">
+        <h1 style="padding:30px 0 5px 30px; color: Maroon;font-size:39px">SINHALA SONGS - SEARCH ENGINE</h1>
+        
+    </hgroup>
+	<form style="padding:0 0 6px 30px; " action="http://127.0.0.1:5000/" method="post" align="left">
+		<input type="text" class="searchTerm" name="searchTerm"  placeholder="type here...">
+    	<input type="submit" value="search" style="background-color: Maroon;color:white;">
+	</form>
+
+	{% if hits %}
+        <head>
+            <title>SINHALA SONGS - SEARCH ENGINE</title>
+        </head>
+    <hgroup class="mb20">
+		<h3 style="padding-left:30px;padding-bottom:15px;color: IndianRed; font-style: italic;" class="lead" id="results" ><strong >No. of results : {{ num_results }}</strong>  </h3>
+	</hgroup>
+
+
+    <section id='song_section' class="col-md-8" style="padding-left:40px; " >
+		{% for hit in hits %}
+		<article class="search-result row center">
+			<div class="col-md-12">
+				<h3 style=" background-color:orange; padding:8px 5px 8px 40px; font-size:23px;color:Navy;">{{ hit._source.title }}</h3>
+				<ul class="meta-search">
+					<li><i class="glyphicon glyphicon-tags"></i> <span><strong>ගායකයා : </strong>{{ hit._source.artist }}</span></li>
+                    <li><i class="glyphicon glyphicon-tags"></i> <span><strong>පද රචනය : </strong>{{ hit._source.writer }}</span></li>
+					<li><i class="glyphicon glyphicon-tags"></i> <span><strong>සංගීතය : </strong>{{ hit._source.music }}</span></li>
+                    <li><i class="glyphicon glyphicon-tags"></i> <span><strong>අයත් කාණ්ඩය : </strong>{{ hit._source.genre }} </span></li>
+                    <li><i class="glyphicon glyphicon-tags"></i> <span><strong>පද වැල : </strong></span></li>
+
+				</ul>
+				<p style="white-space: pre-line;padding-left:85px;">{{ hit._source.lyrics }}</p>
+
+				<li style="padding-left:40px;padding-bottom:15px;"><i class="glyphicon glyphicon-tags"></i><span><strong>රූපක : </strong></span></li>
+
+				<table class="table">
+					<thead class="thead-light">
+					  <tr>
+						<th scope="col" style="  font-size:14px">පද කොටස</th>
+						<th scope="col" style="  font-size:14px">තේරුම</th>
+					  </tr>
+					</thead>
+					<tbody>
+					  {% for metaphor in hit._source.metaphor %}
+						<tr >
+						  <td style=" padding-left:40px; ">{{ metaphor["lyrics_part"] }} :- </td>
+						  <td>{{ metaphor["meaning"] }}  </td>
+						  
+						</tr>
+					  {% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<div class="col-md-6">
+
+			</div>
+			<span class="clearfix borda"></span>
+		</article>
+		{% endfor %}
+	</section>
+
+
+	{% else %}
+		{% if init %}
+            <head>
+            <title>Song Search</title>
+            </head>
+
+
+		{% else %}
+		<hgroup class="mb20">
+			<h2><i><u>Search Results</u></i></h2>
+			<h3 class="lead"><strong class="text-danger">No</strong> results found for : <strong class="text-danger">{{  query  }}</strong></h3>
+		</hgroup>
+		{% endif %}
+	{% endif %}
+</div>
